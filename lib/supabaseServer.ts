@@ -4,14 +4,15 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey || supabaseServiceKey.includes('PLACEHOLDER')) {
-  console.error('CRITICAL ERROR: Supabase Service Role Key is missing or invalid.');
-  console.error('Please update .env.local with your real SUPABASE_SERVICE_ROLE_KEY from the Supabase Dashboard > Project Settings > API.');
-  throw new Error('Supabase Service Role Key is not configured.');
+  console.warn('WARNING: Supabase Service Role Key is missing or invalid. Admin features will fail.');
 }
 
 // Cliente con privilegios de administrador (Service Role)
 // Úsalo solo en el servidor. Nunca en el cliente.
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+export const supabaseAdmin = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co', 
+  supabaseServiceKey || 'placeholder', 
+  {
   auth: {
     autoRefreshToken: false,
     persistSession: false
