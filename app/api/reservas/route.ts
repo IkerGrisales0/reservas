@@ -37,9 +37,7 @@ export async function POST(request: Request) {
        return NextResponse.json({ error: 'Horario no disponible.' }, { status: 409 });
     }
     
-    // Use supabaseAdmin instance created in POST function scope
-    // But since this is a long function, let's just make sure supabaseAdmin is available.
-    // It was created at the top of POST.
+    // Obtención del perfil de cliente vinculado al usuario autenticado para asociar la reserva
     const { data: profile } = await supabaseAdmin
         .from('client_profiles')
         .select('id')
@@ -71,6 +69,7 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+    const supabaseAdmin = getSupabaseAdmin();
     try {
         const user = await getUser(request);
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -78,7 +77,7 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const dateFilter = searchParams.get('date');
 
-        // 1. Verificar si es Restaurante
+        // Verificación de rol de restaurante: Se comprueba si el usuario autenticado posee un perfil de establecimiento
         const { data: restProfile } = await supabaseAdmin
             .from('restaurant_profiles')
             .select('id')
@@ -86,7 +85,7 @@ export async function GET(request: Request) {
             .maybeSingle();
 
         if (restProfile) {
-            // Es restaurante: Devolver reservas de su local
+            // Consulta de reservas asociadas al establecimiento del usuario
             let query = supabaseAdmin
                 .from('reservations')
                 .select(`
@@ -105,7 +104,7 @@ export async function GET(request: Request) {
             return NextResponse.json(data);
         }
 
-        // 2. Verificar si es Cliente
+        // Verificación de rol de cliente: Se comprueba si el usuario autenticado posee un perfil de cliente
         const { data: clientProfile } = await supabaseAdmin
             .from('client_profiles')
             .select('id')
@@ -113,7 +112,7 @@ export async function GET(request: Request) {
             .maybeSingle();
         
         if (clientProfile) {
-            // Es cliente: Devolver sus propias reservas
+            // Consulta del historial de reservas personales del cliente
             const { data, error } = await supabaseAdmin
                 .from('reservations')
                 .select(`
@@ -135,6 +134,7 @@ export async function GET(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+    const supabaseAdmin = getSupabaseAdmin();
     try {
         const user = await getUser(request);
         if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -177,6 +177,7 @@ export async function DELETE(request: Request) {
 }
 
 export async function PUT(request: Request) {
+    const supabaseAdmin = getSupabaseAdmin();
     try {
         const user = await getUser(request);
         if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -186,7 +187,7 @@ export async function PUT(request: Request) {
 
         if (!id || !status) return NextResponse.json({ error: 'Faltan datos' }, { status: 400 });
 
-        // Verificar si es dueño del restaurante
+        // Validación de permisos de gestión: Solo los perfiles de restaurante pueden modificar estados
         const { data: restProfile } = await supabaseAdmin
             .from('restaurant_profiles')
             .select('id')
@@ -197,7 +198,7 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: 'Solo restaurantes pueden modificar reservas' }, { status: 403 });
         }
 
-        // Verificar que la reserva pertenece a su restaurante
+        // Validación de seguridad: Asegurar que la reserva corresponde al establecimiento autenticado
         const { data: reservation } = await supabaseAdmin
             .from('reservations')
             .select('restaurant_id')
