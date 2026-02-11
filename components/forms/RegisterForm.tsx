@@ -65,7 +65,11 @@ export default function RegisterForm() {
   const handleRoleChange = (newRole: 'cliente' | 'restaurante') => {
     setRole(newRole);
     clearErrors();
-    reset({ role: newRole }); 
+    if (newRole === 'cliente') {
+      reset({ role: 'cliente' });
+    } else {
+      reset({ role: 'restaurante' });
+    }
   };
 
   const onSubmit = async (data: FormData) => {
