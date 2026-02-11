@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabaseServer';
+import { getSupabaseAdmin } from '@/lib/supabaseServer';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  const supabaseAdmin = getSupabaseAdmin();
   try {
     const body = await request.json();
     const { action, email, password, name, phone, role, address } = body;

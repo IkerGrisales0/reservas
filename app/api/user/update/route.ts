@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabaseServer';
+import { getSupabaseAdmin } from '@/lib/supabaseServer';
 
 export async function PUT(request: Request) {
+  const supabaseAdmin = getSupabaseAdmin();
   try {
     // 1. Verificar Autenticación
     const authHeader = request.headers.get('Authorization');

@@ -9,12 +9,15 @@ if (!supabaseUrl || !supabaseServiceKey || supabaseServiceKey.includes('PLACEHOL
 
 // Cliente con privilegios de administrador (Service Role)
 // Úsalo solo en el servidor. Nunca en el cliente.
-export const supabaseAdmin = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co', 
-  supabaseServiceKey || 'placeholder', 
-  {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+export function getSupabaseAdmin() {
+  return createClient(
+    supabaseUrl || 'https://placeholder.supabase.co', 
+    supabaseServiceKey || 'placeholder', 
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  );
+}

@@ -1,7 +1,8 @@
 ﻿import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabaseServer';
+import { getSupabaseAdmin } from '@/lib/supabaseServer';
 
 async function getUser(req: Request) {
+  const supabaseAdmin = getSupabaseAdmin();
   const authHeader = req.headers.get('Authorization');
   if (!authHeader) return null;
   const token = authHeader.replace('Bearer ', '');
@@ -11,6 +12,7 @@ async function getUser(req: Request) {
 }
 
 export async function POST(request: Request) {
+  const supabaseAdmin = getSupabaseAdmin();
   try {
     const user = await getUser(request);
     if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -34,7 +36,10 @@ export async function POST(request: Request) {
     if (existing) {
        return NextResponse.json({ error: 'Horario no disponible.' }, { status: 409 });
     }
-
+    
+    // Use supabaseAdmin instance created in POST function scope
+    // But since this is a long function, let's just make sure supabaseAdmin is available.
+    // It was created at the top of POST.
     const { data: profile } = await supabaseAdmin
         .from('client_profiles')
         .select('id')

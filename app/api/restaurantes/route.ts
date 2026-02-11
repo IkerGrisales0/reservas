@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabaseServer';
+import { getSupabaseAdmin } from '@/lib/supabaseServer';
 
 export async function GET(request: Request) {
+  const supabaseAdmin = getSupabaseAdmin();
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   const search = searchParams.get('search');
